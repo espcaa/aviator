@@ -1,0 +1,5 @@
+/opt/homebrew/Cellar/scrcpy/3.2/share/scrcpy/scrcpy-server: 1 file pushed, 0 skipped. 31.3 MB/s (90888 bytes in 0.003s)
+[server] INFO: Device: [Google] google Pixel 7 (Android 15)
+2025-05-05 19:07:36.900 scrcpy[30933:3090900] +[IMKClient subclass]: chose IMKClient_Modern
+2025-05-05 19:07:36.900 scrcpy[30933:3090900] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+2025-05-05 19:07:53.010 scrcpy[30933:3090900] Warning: Window move completed without beginning

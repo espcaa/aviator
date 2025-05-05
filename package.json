@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
+    "@gluestack-ui/button": "^1.0.14",
     "@gluestack-ui/icon": "^0.1.27",
+    "@gluestack-ui/input": "^0.1.38",
     "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gluestack-ui/overlay": "^0.1.22",
     "@gluestack-ui/toast": "^1.0.9",
@@ -33,6 +35,8 @@
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
     "expo-web-browser": "~14.1.6",
+    "jotai": "^2.12.3",
+    "jotai-utils": "^0.0.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",

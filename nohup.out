@@ -3,3 +3,9 @@
 2025-05-05 19:07:36.900 scrcpy[30933:3090900] +[IMKClient subclass]: chose IMKClient_Modern
 2025-05-05 19:07:36.900 scrcpy[30933:3090900] +[IMKInputSession subclass]: chose IMKInputSession_Modern
 2025-05-05 19:07:53.010 scrcpy[30933:3090900] Warning: Window move completed without beginning
+WARN: Device disconnected
+scrcpy 3.2 <https://github.com/Genymobile/scrcpy>
+INFO: ADB device found:
+INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
+INFO: Renderer: metal
+INFO: Texture: 1080x2400

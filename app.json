@@ -35,7 +35,13 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsVersion": "10.1.39"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

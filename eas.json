@@ -1,0 +1,9 @@
+{
+  "build": {
+    "development": {
+      "env": {
+        "MAPBOX_TOKEN": "pk.eyJ1Ijoic3BlY3RyYWxvIiwiYSI6ImNtYzg3Y255OTEwY2MybnA5MHdvNTNjaXYifQ.o-iSxKx62mh6xtaAj2vSiQ"
+      }
+    }
+  }
+}

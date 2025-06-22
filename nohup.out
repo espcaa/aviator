@@ -9,3 +9,54 @@ INFO: ADB device found:
 INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
 INFO: Renderer: metal
 INFO: Texture: 1080x2400
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+/opt/homebrew/Cellar/scrcpy/3.2/share/scrcpy/scrcpy-server: 1 file pushed, 0 skipped. 64.3 MB/s (90888 bytes in 0.001s)
+[server] INFO: Device: [Google] google Pixel 7 (Android 15)
+2025-05-07 18:37:22.497 scrcpy[93110:5929493] +[IMKClient subclass]: chose IMKClient_Modern
+2025-05-07 18:37:22.497 scrcpy[93110:5929493] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+WARN: Device disconnected
+scrcpy 3.2 <https://github.com/Genymobile/scrcpy>
+INFO: ADB device found:
+INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
+INFO: Renderer: metal
+INFO: Texture: 1080x2400
+/opt/homebrew/Cellar/scrcpy/3.2/share/scrcpy/scrcpy-server: 1 file pushed, 0 skipped. 110.4 MB/s (90888 bytes in 0.001s)
+[server] INFO: Device: [Google] google Pixel 7 (Android 15)
+2025-05-07 18:38:11.702 scrcpy[93137:5931021] +[IMKClient subclass]: chose IMKClient_Modern
+2025-05-07 18:38:11.702 scrcpy[93137:5931021] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+WARN: Device disconnected
+scrcpy 3.2 <https://github.com/Genymobile/scrcpy>
+INFO: ADB device found:
+INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
+INFO: Renderer: metal
+INFO: Texture: 1080x2400
+/opt/homebrew/Cellar/scrcpy/3.2/share/scrcpy/scrcpy-server: 1 file pushed, 0 skipped. 157.9 MB/s (90888 bytes in 0.001s)
+[server] INFO: Device: [Google] google Pixel 7 (Android 15)
+2025-05-07 18:38:32.576 scrcpy[93169:5931995] +[IMKClient subclass]: chose IMKClient_Modern
+2025-05-07 18:38:32.576 scrcpy[93169:5931995] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+[server] INFO: Device clipboard set
+/Users/spectralo/Downloads/c993x5zdb1sc1.jpeg: 1 file pushed, 0 skipped. 217.2 MB/s (374897 bytes in 0.002s)
+WARN: Device disconnected
+scrcpy 3.2 <https://github.com/Genymobile/scrcpy>
+INFO: ADB device found:
+INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
+INFO: Renderer: metal
+INFO: Texture: 1080x2400
+INFO: Request to push /Users/spectralo/Downloads/c993x5zdb1sc1.jpeg
+INFO: Pushing /Users/spectralo/Downloads/c993x5zdb1sc1.jpeg...
+INFO: /Users/spectralo/Downloads/c993x5zdb1sc1.jpeg successfully pushed to /sdcard/Download/
+INFO: Display orientation set to 90
+INFO: Display orientation set to 0
+/opt/homebrew/Cellar/scrcpy/3.2/share/scrcpy/scrcpy-server: 1 file pushed, 0 skipped. 43.3 MB/s (90888 bytes in 0.002s)
+[server] INFO: Device: [Google] google Pixel 7 (Android 15)
+2025-05-08 12:45:00.866 scrcpy[6909:7935817] +[IMKClient subclass]: chose IMKClient_Modern
+2025-05-08 12:45:00.866 scrcpy[6909:7935817] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+2025-05-08 12:45:02.424 scrcpy[6909:7935817] Warning: Window move completed without beginning
+WARN: Device disconnected
+scrcpy 3.2 <https://github.com/Genymobile/scrcpy>
+INFO: ADB device found:
+INFO:     -->   (usb)  2B041FDH20007Q                  device  Pixel_7
+INFO: Renderer: metal
+INFO: Texture: 1080x2400
+INFO: Device clipboard copied

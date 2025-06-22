@@ -11,6 +11,7 @@ import {
   CheckboxLabel,
 } from "@/components/ui/checkbox";
 import { useRouter } from "expo-router";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState("");
@@ -18,9 +19,10 @@ export default function SignUpScreen() {
   const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [secondPassword, setSecondPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  function handleSignUp() {
+  async function handleSignUp() {
     if (!email || !password) {
       setError("Please fill in all fields");
       return;
@@ -41,14 +43,90 @@ export default function SignUpScreen() {
       return;
     }
 
-    setError("");
+    if (!(await checkEmailAvaibility(email))) {
+      setError("Email is already in use");
+      return;
+    } else {
+      console.log("Email is available");
+    }
 
-    router.push(`/(auth)/otp?email=${email}&password=${password}`);
+    setError("");
+    setIsLoading(true);
+
+    await fetch(`https://aviator.spectralo.hackclub.app/api/otp/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+          console.log("OTP sent successfully");
+          setIsLoading(false);
+          router.push(
+            `/(auth)/otp?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+          );
+        } else {
+          setIsLoading(false);
+          setError("Error sending OTP");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setIsLoading(false);
+        setError("Error sending OTP");
+      });
   }
 
   function checkEmail(email: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  async function checkEmailAvaibility(email: string): Promise<boolean> {
+    try {
+      const response = await fetch(
+        `https://aviator.spectralo.hackclub.app/api/users/checkEmail?email=${email}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        console.error("Failed to fetch email availability" + response);
+        return false;
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      return data.available; // Return the actual availability status
+    } catch (error) {
+      console.error("Error checking email availability:", error);
+      return false; // Return false if an error occurs
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          justifyContent: "center",
+          flex: 1,
+        }}
+        className="bg-background-0"
+      >
+        <Spinner size="large" />
+      </View>
+    );
   }
 
   return (

@@ -29,7 +29,13 @@ export default function LoginScreen() {
           <Text size="lg" className="text-white">
             Please login or sign up to continue.
           </Text>
-          <Button size="xl" className="mt-8">
+          <Button
+            size="xl"
+            className="mt-8"
+            onPress={() => {
+              router.navigate("/(auth)/login");
+            }}
+          >
             <ButtonText>Login</ButtonText>
           </Button>
           <Button

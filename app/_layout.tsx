@@ -8,7 +8,7 @@ import { useColorScheme, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 export default function RootLayout() {
-  const [isLoggedIn] = useAtom(authAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(authAtom);
   const [colorScheme] = useAtom(colorscheme);
   const systemColorScheme = useColorScheme();
 
@@ -27,18 +27,21 @@ export default function RootLayout() {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then((response) => {
+        .then(async (response) => {
           if (response.ok) {
-            isLoggedIn = true;
+            setIsLoggedIn(true);
+            // Store the token
+            let data = await response.json();
+            SecureStore.setItemAsync("sessionToken", data.token);
           } else {
-            isLoggedIn = false;
+            setIsLoggedIn(false);
           }
         })
         .catch(() => {
-          isLoggedIn = false;
+          setIsLoggedIn(false);
         });
     } else {
-      isLoggedIn = false;
+      setIsLoggedIn(false);
     }
   });
 

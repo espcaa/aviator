@@ -6,44 +6,56 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Image } from "expo-image";
 import { useAtom } from "jotai";
 import { authAtom } from "@/atoms/auth";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 
 export default function Success() {
   const { email } = useLocalSearchParams();
   let emailString = email as string;
   const emailwithoutatpart = emailString?.split("@")[0];
-  const [isLoggedIn] = useAtom(authAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(authAtom);
   const [errorText, setErrorText] = useState("");
+  // Track mounted status
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     // Get a session token & set isLoggedIn to true
-    try {
-      fetch(`https://aviator.spectralo.hackclub.app/api/sessions/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${email}`,
-        },
-      })
-        .then((response) => {
-          if (response.token) {
-            isLoggedIn = true;
-          } else {
-            setErrorText(
-              "Wow something truly unexpected happened!!! Our army of rabbits is working on it.",
-            );
-          }
-        })
-        .catch((error) => {
-          console.error("Error logging in:", error);
+    // get the refresh token from secure store
+    SecureStore.getItemAsync("refreshToken").then(async (token) => {
+      try {
+        console.log("Token:", token);
+        const response = await fetch(
+          `https://aviator.spectralo.hackclub.app/api/sessions/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const data = await response.json();
+        if (data.token) {
+          setIsLoggedIn(true);
+        } else {
+          console.log("Login failed:", data);
+          setErrorText(
+            "Wow something truly unexpected happened!!! Our army of rabbits is working on it.",
+          );
+        }
+      } catch (error) {
+        console.error("Error logging in:", error);
+        if (mounted.current) {
           setErrorText("Server error, please try again later.");
-        });
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      setErrorText(
-        "Wow something truly unexpected happened!!! Our army of rabbits is working on it...",
-      );
-    }
+        }
+      }
+    });
   }
 
   return (
@@ -85,23 +97,18 @@ export default function Success() {
           className="mt-8"
           size="xl"
           style={{ backgroundColor: "#1B5E20", borderRadius: 25 }}
+          onPress={handleSubmit}
         >
-          <ButtonText
-            style={{ color: "#FFFFFF", fontSize: 16 }}
-            onPress={handleSubmit()}
-          >
+          <ButtonText style={{ color: "#FFFFFF", fontSize: 16 }}>
             Get Started with Aviator
           </ButtonText>
         </Button>
         <Text
-          size="md"
-          style={{
-            textAlign: "center",
-            color: "#FFFFFF",
-            marginTop: 20,
-          }}
+          size="xl"
+          bold
+          className="text-red-600 mt-2 bg-background-0 p-3 rounded-lg"
         >
-          {{ errorText }}
+          {errorText}
         </Text>
       </View>
     </LinearGradient>

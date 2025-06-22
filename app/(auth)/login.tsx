@@ -69,9 +69,9 @@ export default function LoginScreen() {
       } else {
         // Handle OK response
         console.log("Login successful:", data);
-        if (data.refreshToken) {
-          console.log("Storing refresh token securely: ", data.refreshToken);
-          await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+        if (data.token) {
+          console.log("Storing refresh token securely: ", data.token);
+          await SecureStore.setItemAsync("refreshToken", data.token);
           router.push(`/(auth)/success?email=${email}`);
         } else {
           setError("Login successful but no refresh token received.");

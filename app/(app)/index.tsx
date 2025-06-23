@@ -1,14 +1,6 @@
 import { View, Text } from "react-native";
 
 export default function HomeScreen() {
-  let MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
-
-  if (!MAPBOX_TOKEN) {
-    console.warn(
-      "MAPBOX_TOKEN is not set. Please set it in your environment variables.",
-    );
-  }
-
   return (
     <View
       style={{

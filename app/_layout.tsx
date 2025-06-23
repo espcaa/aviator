@@ -34,6 +34,7 @@ export default function RootLayout() {
             let data = await response.json();
             SecureStore.setItemAsync("sessionToken", data.token);
           } else {
+            console.log("Login failed, invalid token");
             setIsLoggedIn(false);
           }
         })
@@ -41,6 +42,7 @@ export default function RootLayout() {
           setIsLoggedIn(false);
         });
     } else {
+      console.log("No refresh token found");
       setIsLoggedIn(false);
     }
   });

@@ -42,3 +42,6 @@ ios
 /android
 /ios
 eas.json
+aviator/eas.json
+# Ignore gradle.properties containing sensitive info
+gradle.properties

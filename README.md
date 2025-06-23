@@ -1,3 +1,5 @@
+https://github.com/user-attachments/assets/8d2f68d7-c3b2-44de-8c03-ddedf122287c
+
 # Aviator
 
 A flightly clone (but worse) app made to track your flights (and those of your friends).

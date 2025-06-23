@@ -1,4 +1,4 @@
-https://github.com/user-attachments/assets/8d2f68d7-c3b2-44de-8c03-ddedf122287c
+<img src="https://github.com/user-attachments/assets/8d2f68d7-c3b2-44de-8c03-ddedf122287c" width="200" alt="airbus a320 neo">
 
 # Aviator
 

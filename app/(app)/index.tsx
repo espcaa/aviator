@@ -1,12 +1,19 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { useEffect, useState, useRef, useCallback } from "react";
+import {
+  View,
+  ActivityIndicator,
+  StyleSheet,
+  Keyboard,
+  BackHandler,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import Mapbox from "@rnmapbox/maps";
 import BottomSheet, {
   BottomSheetView,
-  useBottomSheetSpringConfigs,
+  BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
+import { Image } from "expo-image";
 // Import tailwind config
 import { cssInterop } from "nativewind";
 import customHandle from "@/components/handle";
@@ -20,9 +27,13 @@ import { useAtom } from "jotai";
 import { nameAtom } from "@/atoms/userinfo";
 import { mapStyleAtom } from "@/atoms/settings";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Input, InputField } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
+
+// wow i'm a secret
 
 cssInterop(BottomSheet, {
   className: { target: "backgroundStyle" },
@@ -30,7 +41,6 @@ cssInterop(BottomSheet, {
 cssInterop(BottomSheetView, {
   className: { target: "style" },
 });
-
 cssInterop(MaterialIcons, {
   className: { target: "style" },
 });
@@ -52,20 +62,56 @@ export default function HomeScreen() {
 
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [AirlineSearch, setAirlineSearch] = useState(true);
   const [snappingPoints, setSnappingPoints] = useState<string[]>([
     "15%",
     "40%",
   ]);
+  const [textInputFocused, setTextInputFocused] = useState(false);
+  const [textInputValue, setTextInputValue] = useState("");
+  const [airlineData, setAirlineData] = useState<any[]>([]);
   const sheetRef = useRef<BottomSheet>(null);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-    if (index === 2) {
-      // 2 corresponds to the "90%" snap point
-      sheetRef.current?.snapToIndex(1); // Revert to the "50%" snap point
-    }
-  }, []);
+  const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const insets = useSafeAreaInsets();
+
+  // Fetch the airlines when the value changes and AirlineSearch is true
+  useEffect(() => {
+    async function fetchAirlines() {
+      if (textInputValue.trim() !== "" && AirlineSearch) {
+        fetch(
+          `https://aviator.spectralo.hackclub.app/api/airlines/getAirlines`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              sessionToken: await SecureStore.getItemAsync("sessionToken"),
+              searchString: textInputValue,
+              searchlimit: 10, // You can adjust this limit as needed
+            }),
+          },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              console.error("Error fetching airlines:", data.error);
+              return;
+            }
+            console.log("Airlines data:", data.airlines);
+            setAirlineData(data.airlines || []);
+            setAirlineSearch(true);
+          })
+          .catch((error) => {
+            console.error("Error fetching airlines:", error);
+          });
+      } else {
+        setAirlineData([]);
+      }
+    }
+    fetchAirlines();
+  }, [textInputValue, AirlineSearch]);
 
   async function fetchMapboxToken() {
     let isValid = true;
@@ -115,6 +161,8 @@ export default function HomeScreen() {
     }
   }
 
+  // comments in code are like silkscreen on pcbs!
+
   useEffect(() => {
     async function initMapboxToken() {
       const token = await fetchMapboxToken();
@@ -125,6 +173,40 @@ export default function HomeScreen() {
       setLoading(false);
     }
     initMapboxToken();
+  }, []);
+
+  useEffect(() => {
+    const onKeyboardHide = () => {
+      console.log("Kbhide");
+      if (
+        textInputFocused === false &&
+        (typeof textInputValue === "string" ? textInputValue.trim() : "") === ""
+      ) {
+        Keyboard.dismiss();
+        setSnappingPoints(["15%", "40%"]);
+        sheetRef.current?.snapToIndex(1);
+      }
+      setTextInputFocused(false);
+    };
+
+    const keyboardListener = Keyboard.addListener(
+      "keyboardDidHide",
+      onKeyboardHide,
+    );
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onKeyboardHide();
+        return false;
+        // Who needs comment fr, just ai :D
+      },
+    );
+
+    return () => {
+      keyboardListener.remove();
+      backHandler.remove();
+    };
   }, []);
 
   const handleSatelliteToggle = () => {
@@ -172,10 +254,10 @@ export default function HomeScreen() {
           style={{
             borderRadius: 50,
             borderWidth: 0,
-            width: 60, // Fixed width
-            height: 60, // Fixed height
-            justifyContent: "center", // Centers the icon
-            alignItems: "center", // Centers the icon
+            width: 60,
+            height: 60,
+            justifyContent: "center",
+            alignItems: "center",
           }}
           className="bg-background-0 focus:bg-background-50 "
           onPress={handleSatelliteToggle}
@@ -183,9 +265,7 @@ export default function HomeScreen() {
           {mapStyleUrl === "mapbox://styles/mapbox/standard" ? (
             <MaterialIcons
               name="satellite-alt"
-              size={24} // Use a fixed size for the icon
-              // Use the primary color from the theme
-
+              size={24}
               className="text-primary-500"
             />
           ) : (
@@ -199,7 +279,7 @@ export default function HomeScreen() {
         projection="globe"
         scaleBarEnabled={false}
         onPress={() => {
-          sheetRef.current?.snapToIndex(0); // Snap to the first point (10%)
+          sheetRef.current?.snapToIndex(0);
         }}
       />
       <BottomSheet
@@ -219,6 +299,7 @@ export default function HomeScreen() {
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
+            width: "100%", // Ensure it takes full width
           }}
           className="bg-background-0"
         >
@@ -241,7 +322,6 @@ export default function HomeScreen() {
             <Avatar size="lg">
               <AvatarFallbackText></AvatarFallbackText>
               <AvatarImage
-                // Use a svg here
                 source={{
                   uri:
                     "https://api.dicebear.com/9.x/initials/png?seed=" +
@@ -254,6 +334,84 @@ export default function HomeScreen() {
               />
             </Avatar>
           </View>
+          <Input
+            variant="rounded"
+            size="lg"
+            style={{ width: "90%", marginBottom: 20 }}
+            className="bg-background-0"
+          >
+            <InputField
+              placeholder="What airlines are you traveling with?"
+              onChangeText={(text) => {
+                setTextInputValue(text);
+              }}
+              onFocus={() => {
+                if (textInputFocused === false) {
+                  setSnappingPoints(["80%", "80%"]); // Higher snapping point for scrolling
+                  setTextInputFocused(true);
+                  console.log("Focused");
+                }
+              }}
+              onBlur={() => {
+                setSnappingPoints(["15%", "40%"]);
+                setTextInputFocused(false);
+                console.log("Unfocused");
+                sheetRef.current?.snapToIndex(1);
+              }}
+              onSubmitEditing={() => {
+                setTextInputFocused(false);
+                if ((textInputValue || "").trim() === "") {
+                  setSnappingPoints(["15%", "40%"]);
+                  sheetRef.current?.snapToIndex(1);
+                }
+              }}
+            />
+          </Input>
+          {!AirlineSearch && (
+            <Image
+              source={require("@/assets/arrowdark.png")}
+              style={{ width: 150, height: 150 }}
+              contentFit="contain"
+            />
+          )}
+          <BottomSheetScrollView
+            style={{ width: "90%", flexGrow: 1 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            {AirlineSearch &&
+              airlineData.map((airline) => (
+                <Card
+                  key={airline.name}
+                  className="mb-2"
+                  variant="outline"
+                  style={{ padding: 10 }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 5,
+                        backgroundColor: "white",
+                        marginRight: 10,
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri: `https://aviator.spectralo.hackclub.app/api/logo/getLogo?icao=${airline.code}`,
+                        }}
+                        style={{ width: 40, height: 40, margin: 5 }}
+                        contentFit="contain"
+                        transition={1000}
+                      />
+                    </View>
+                    <Heading size="xl" className="mt-0">
+                      {airline.name} - {airline.code}
+                    </Heading>
+                  </View>
+                </Card>
+              ))}
+          </BottomSheetScrollView>
         </BottomSheetView>
       </BottomSheet>
     </View>

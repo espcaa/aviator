@@ -106,7 +106,7 @@ export default function Success() {
         <Text
           size="xl"
           bold
-          className="text-red-600 mt-2 bg-background-0 p-3 rounded-lg"
+          className="text-red-600 mt-2 bg-background-0 rounded-lg"
         >
           {errorText}
         </Text>

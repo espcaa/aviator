@@ -42,7 +42,8 @@
         {
           "RNMapboxMapsVersion": "11.13.1"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

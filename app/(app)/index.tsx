@@ -6,6 +6,7 @@ import {
   Keyboard,
   BackHandler,
 } from "react-native";
+import FastImage from "@d11/react-native-fast-image";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import Mapbox from "@rnmapbox/maps";
@@ -13,7 +14,6 @@ import BottomSheet, {
   BottomSheetView,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-import { Image } from "expo-image";
 // Import tailwind config
 import { cssInterop } from "nativewind";
 import customHandle from "@/components/handle";
@@ -74,6 +74,10 @@ export default function HomeScreen() {
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const insets = useSafeAreaInsets();
+
+  function isSearchBarEmpty() {
+    return typeof textInputValue === "string" && textInputValue.trim() === "";
+  }
 
   // Fetch the airlines when the value changes and AirlineSearch is true
   useEffect(() => {
@@ -178,10 +182,9 @@ export default function HomeScreen() {
   useEffect(() => {
     const onKeyboardHide = () => {
       console.log("Kbhide");
-      if (
-        textInputFocused === false &&
-        (typeof textInputValue === "string" ? textInputValue.trim() : "") === ""
-      ) {
+      console.log(isSearchBarEmpty());
+
+      if (isSearchBarEmpty()) {
         Keyboard.dismiss();
         setSnappingPoints(["15%", "40%"]);
         sheetRef.current?.snapToIndex(1);
@@ -353,14 +356,16 @@ export default function HomeScreen() {
                 }
               }}
               onBlur={() => {
-                setSnappingPoints(["15%", "40%"]);
                 setTextInputFocused(false);
-                console.log("Unfocused");
-                sheetRef.current?.snapToIndex(1);
+                if (isSearchBarEmpty()) {
+                  setSnappingPoints(["15%", "40%"]);
+                  console.log("Unfocused");
+                  sheetRef.current?.snapToIndex(1);
+                }
               }}
               onSubmitEditing={() => {
                 setTextInputFocused(false);
-                if ((textInputValue || "").trim() === "") {
+                if (isSearchBarEmpty()) {
                   setSnappingPoints(["15%", "40%"]);
                   sheetRef.current?.snapToIndex(1);
                 }
@@ -368,10 +373,9 @@ export default function HomeScreen() {
             />
           </Input>
           {!AirlineSearch && (
-            <Image
+            <FastImage
               source={require("@/assets/arrowdark.png")}
               style={{ width: 150, height: 150 }}
-              contentFit="contain"
             />
           )}
           <BottomSheetScrollView
@@ -396,13 +400,11 @@ export default function HomeScreen() {
                         marginRight: 10,
                       }}
                     >
-                      <Image
+                      <FastImage
                         source={{
                           uri: `https://aviator.spectralo.hackclub.app/api/logo/getLogo?icao=${airline.code}`,
                         }}
                         style={{ width: 40, height: 40, margin: 5 }}
-                        contentFit="contain"
-                        transition={1000}
                       />
                     </View>
                     <Heading size="xl" className="mt-0">

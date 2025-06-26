@@ -4,10 +4,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SecureStore from "expo-secure-store";
 import { useAtom } from "jotai";
 import { emailAtom, nameAtom } from "@/atoms/userinfo";
+import { authAtom } from "@/atoms/auth";
 
 export default function AppLayout() {
   const [name, setName] = useAtom(nameAtom);
   const [email, setEmail] = useAtom(emailAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(authAtom);
 
   // Update the user info in localStorage
 
@@ -36,6 +38,10 @@ export default function AppLayout() {
             } else {
               console.error("Failed to update user info");
               console.error("Response status:", response.status);
+              // Log off the user
+              await SecureStore.deleteItemAsync("sessionToken");
+              await SecureStore.deleteItemAsync("refreshToken");
+              setIsLoggedIn(false);
             }
           })
           .catch((error) => {

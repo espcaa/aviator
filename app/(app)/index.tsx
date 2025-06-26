@@ -1,28 +1,17 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import {
-  View,
-  ActivityIndicator,
-  StyleSheet,
-  Keyboard,
-  BackHandler,
-  Pressable,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator, StyleSheet, Keyboard } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import Mapbox from "@rnmapbox/maps";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 // Import tailwind config
 import { cssInterop } from "nativewind";
-import customHandle from "@/components/handle";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { useAtom } from "jotai";
-import { nameAtom } from "@/atoms/userinfo";
 import { mapStyleAtom } from "@/atoms/settings";
 import { Button, ButtonText } from "@/components/ui/button";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AirlineSearch from "@/components/AirlineSearch";
 import {
   Modal,
   ModalBackdrop,
@@ -33,7 +22,6 @@ import {
 } from "@/components/ui/modal";
 import { Heading } from "@/components/ui/heading";
 import { CloseIcon, Icon } from "@/components/ui/icon";
-import { authAtom } from "@/atoms/auth";
 
 // wow i'm a secret
 
@@ -59,108 +47,23 @@ function isJwtExpired(token: string): boolean {
 }
 
 export default function HomeScreen() {
-  const [fullName] = useAtom(nameAtom);
   const [mapStyleUrl, setMapStyleUrl] = useAtom(mapStyleAtom);
-
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [tokenStatus, setTokenStatus] = useState<
     "loading" | "success" | "error"
   >("loading");
   const [tokenError, setTokenError] = useState<string | null>(null);
-  // Bottom sheet state management
-  type BottomSheetState = "collapsed" | "expanded" | "searchFocused";
-  const [bottomSheetState, setBottomSheetState] =
-    useState<BottomSheetState>("expanded");
-  const [isSearchBarEmpty, setIsSearchBarEmpty] = useState(true);
-  const [hasAirlineData, setHasAirlineData] = useState(false);
   const [showModal, setShowModal] = React.useState(false);
-  const [, setIsLoggedIn] = useAtom(authAtom);
-  const sheetRef = useRef<BottomSheet>(null);
-
-  // Get snap points based on current state and if there's airline data
-  const getSnapPoints = useCallback((): string[] => {
-    switch (bottomSheetState) {
-      case "collapsed":
-        return hasAirlineData ? ["80%", "80%"] : ["15%", "40%"];
-      case "expanded":
-        return hasAirlineData ? ["80%", "80%"] : ["40%", "40%"];
-      case "searchFocused":
-        return ["80%", "80%"];
-      default:
-        return hasAirlineData ? ["80%", "80%"] : ["15%", "40%"];
-    }
-  }, [bottomSheetState, hasAirlineData]);
-
-  const handleSheetChanges = useCallback(
-    (index: number) => {
-      console.log("Sheet index changed to:", index);
-      // If we have airline data, always keep the sheet at index 1 (expanded)
-      if (hasAirlineData && index === 0) {
-        console.log("Preventing collapse because there is airline data");
-        sheetRef.current?.snapToIndex(1);
-        return;
-      }
-
-      // Only allow collapsing if empty search and not in search mode
-      if (
-        index === 0 &&
-        (!isSearchBarEmpty || bottomSheetState === "searchFocused")
-      ) {
-        console.log(
-          "Preventing collapse because text is in search bar or search is focused",
-        );
-        sheetRef.current?.snapToIndex(1);
-      } else if (index === 0 && bottomSheetState !== "collapsed") {
-        setBottomSheetState("collapsed");
-      }
-    },
-    [bottomSheetState, isSearchBarEmpty, hasAirlineData],
-  );
 
   const insets = useSafeAreaInsets();
 
-  // Centralized handlers for text input and bottom sheet
-  const handleTextInputFocus = () => {
-    setBottomSheetState("searchFocused");
-    sheetRef.current?.snapToIndex(1);
-    console.log("Search focused");
-  };
-
-  const handleTextInputBlur = (isEmpty: boolean) => {
-    setIsSearchBarEmpty(isEmpty);
-    if (isEmpty && !hasAirlineData) {
-      setBottomSheetState("collapsed");
-    } else {
-      setBottomSheetState("expanded");
-    }
-    sheetRef.current?.snapToIndex(1);
-  };
-
-  const handleTextInputSubmit = (isEmpty: boolean) => {
-    setIsSearchBarEmpty(isEmpty);
-    if (isEmpty && !hasAirlineData) {
-      setBottomSheetState("collapsed");
-    } else {
-      setBottomSheetState("expanded");
-    }
-    sheetRef.current?.snapToIndex(1);
-  };
-
-  const handleTextInputChange = (text: string) => {
-    const isEmpty = text.trim() === "";
-    setIsSearchBarEmpty(isEmpty);
-    // No need to change sheet state here - just track if search is empty
-  };
-
   async function fetchMapboxToken(retryCount = 0): Promise<string | null> {
     try {
-      // First check if we have a valid token stored
       const currentToken = await SecureStore.getItemAsync("mapboxToken");
       if (currentToken && !isJwtExpired(currentToken)) {
         return currentToken;
       }
 
-      // Otherwise fetch a new token
       const sessionToken = await SecureStore.getItemAsync("sessionToken");
       const response = await fetch(
         "https://aviator.spectralo.hackclub.app/api/maps/getToken",
@@ -183,17 +86,14 @@ export default function HomeScreen() {
         throw new Error("No token received from server");
       }
 
-      // Store the new token
       await SecureStore.setItemAsync("mapboxToken", data.token);
       console.log("Mapbox token updated successfully");
       return data.token;
     } catch (error) {
       console.error("Error fetching Mapbox token:", error);
 
-      // Retry logic (max 3 retries)
       if (retryCount < 3) {
         console.log(`Retrying token fetch (attempt ${retryCount + 1})...`);
-        // Exponential backoff
         await new Promise((resolve) =>
           setTimeout(resolve, 1000 * Math.pow(2, retryCount)),
         );
@@ -221,7 +121,6 @@ export default function HomeScreen() {
           throw new Error("Could not obtain a valid Mapbox token");
         }
       } catch (error) {
-        console.error("Token initialization failed:", error);
         setTokenError(error instanceof Error ? error.message : "Unknown error");
         setTokenStatus("error");
       }
@@ -229,64 +128,6 @@ export default function HomeScreen() {
 
     initMapboxToken();
   }, []);
-
-  useEffect(() => {
-    const onKeyboardHide = () => {
-      console.log("Keyboard hidden");
-      console.log("isSearchBarEmpty:", isSearchBarEmpty);
-      console.log("hasAirlineData:", hasAirlineData);
-
-      Keyboard.dismiss();
-
-      // Update bottom sheet state based on search content and airline data
-      if (isSearchBarEmpty && !hasAirlineData) {
-        setBottomSheetState("collapsed");
-      } else {
-        setBottomSheetState("expanded");
-      }
-      sheetRef.current?.snapToIndex(1);
-    };
-
-    const keyboardListener = Keyboard.addListener(
-      "keyboardDidHide",
-      onKeyboardHide,
-    );
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        // If in search focused mode, first go back to normal mode
-        if (bottomSheetState === "searchFocused") {
-          onKeyboardHide();
-          return true;
-        }
-        // If text is in the search bar or if we have airline data, prevent back action
-        else if (!isSearchBarEmpty || hasAirlineData) {
-          return true;
-        }
-        // Otherwise let the system handle back
-        return false;
-      },
-    );
-
-    return () => {
-      keyboardListener.remove();
-      backHandler.remove();
-    };
-  }, [isSearchBarEmpty, bottomSheetState, hasAirlineData]);
-
-  // Effect to handle airline data changes
-  useEffect(() => {
-    console.log("Airline data changed:", hasAirlineData);
-    if (hasAirlineData) {
-      // If we get airline data, expand the sheet
-      setBottomSheetState("expanded");
-      sheetRef.current?.snapToIndex(1);
-    } else if (isSearchBarEmpty) {
-      // If no airline data and search is empty, collapse
-      setBottomSheetState("collapsed");
-    }
-  }, [hasAirlineData, isSearchBarEmpty]);
 
   const handleSatelliteToggle = () => {
     if (mapStyleUrl === "mapbox://styles/mapbox/standard") {
@@ -389,78 +230,7 @@ export default function HomeScreen() {
         styleURL={mapStyleUrl}
         projection="globe"
         scaleBarEnabled={false}
-        onPress={() => {
-          if (
-            isSearchBarEmpty &&
-            !hasAirlineData &&
-            bottomSheetState !== "searchFocused"
-          ) {
-            sheetRef.current?.snapToIndex(0);
-          }
-          Keyboard.dismiss();
-        }}
       />
-      <BottomSheet
-        ref={sheetRef}
-        onChange={handleSheetChanges}
-        animateOnMount={true}
-        snapPoints={getSnapPoints()}
-        index={1}
-        enableDynamicSizing={false}
-        handleComponent={customHandle}
-        enablePanDownToClose={false}
-        // @ts-ignore
-        // It's fiiiiine
-        className="bg-background-0"
-      >
-        <BottomSheetScrollView
-          style={{
-            flex: 1,
-            width: "100%", // Ensure it takes full width
-          }}
-          className="bg-background-0"
-        >
-          <View
-            style={{
-              marginVertical: 20,
-              display: "flex",
-              flexDirection: "row",
-              // Align items center
-              alignItems: "center",
-              // Make the two items opposite on width
-              justifyContent: "space-between",
-              width: "100%",
-              paddingHorizontal: 20,
-            }}
-          >
-            <Text size="3xl" className="font-bold">
-              Aviator
-            </Text>
-            <Pressable onPress={() => setShowModal(true)}>
-              <Avatar size="lg">
-                <AvatarImage
-                  source={{
-                    uri:
-                      "https://api.dicebear.com/9.x/initials/png?seed=" +
-                      encodeURIComponent(fullName) +
-                      "&fontWeight=900" +
-                      "&backgroundType=gradientLinear,solid" +
-                      "&scale=80",
-                  }}
-                />
-              </Avatar>
-            </Pressable>
-          </View>
-          <AirlineSearch
-            onTextInputFocus={handleTextInputFocus}
-            onTextInputBlur={handleTextInputBlur}
-            onTextInputSubmit={handleTextInputSubmit}
-            onTextInputChange={handleTextInputChange}
-            onAirlineDataChange={(hasData) => setHasAirlineData(hasData)}
-            active={true}
-          />
-        </BottomSheetScrollView>
-      </BottomSheet>
       <Modal
         isOpen={showModal}
         onClose={() => {

@@ -215,7 +215,10 @@ export default function SignUpScreen() {
               className="mt-4"
             >
               <CheckboxIndicator>
-                <CheckboxIcon as={Ionicons} name="checkmark" />
+                <CheckboxIcon
+                  as={Ionicons} //@ts-ignore
+                  name="checkmark"
+                />
               </CheckboxIndicator>
               <CheckboxLabel>Show passwords</CheckboxLabel>
             </Checkbox>

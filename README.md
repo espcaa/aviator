@@ -9,18 +9,9 @@ Mainly built for android but can in theory work on iOS too (too lazy to build a 
 
 1. Set your mapbox token for the map to work:
 
-- In the eas.json file you should have:
+- Create a `.env` file in the root of the project.
 ```json
-{
-  "build": {
-    "development": {
-      "env": {
-        "MAPBOX_TOKEN": "pk.ey..Q",
-        "RNMapboxMapsDownloadToken": "sk.ey...w"
-      }
-    }
-  }
-}
+E
 ```
 
 2. Install the dependencies:

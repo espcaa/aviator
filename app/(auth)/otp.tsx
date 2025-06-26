@@ -117,7 +117,7 @@ export default function OTPScreen() {
                   } else {
                     console.log("Login successful:", data);
                     // Store the token securely
-                    SecureStore.setItemAsync("RefreshToken", data.token)
+                    SecureStore.setItemAsync("refreshToken", data.token)
                       .then(() => {
                         console.log("Token stored successfully");
                       })
@@ -192,6 +192,7 @@ export default function OTPScreen() {
                 }}
               >
                 <TextInput
+                  // @ts-ignore
                   ref={(ref) => (inputRefs.current[index] = ref)}
                   value={otp[index]}
                   onChangeText={(value) => handleOtpChange(value, index)}

@@ -78,7 +78,7 @@ export default function LoginScreen() {
         }
       }
     } catch (error) {
-      setError("An error occurred while connecting to the server."); // Connection or parsing error
+      setError("An error occurred while connecting to the server," + error);
     } finally {
       setIsLoading(false); // Always stop loading
     }
@@ -171,7 +171,11 @@ export default function LoginScreen() {
               className="mt-4"
             >
               <CheckboxIndicator>
-                <CheckboxIcon as={Ionicons} name="checkmark" />
+                <CheckboxIcon
+                  as={Ionicons}
+                  //@ts-ignore
+                  name="checkmark"
+                />
               </CheckboxIndicator>
               <CheckboxLabel>Show password</CheckboxLabel>
             </Checkbox>

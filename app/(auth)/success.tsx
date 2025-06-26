@@ -1,6 +1,5 @@
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Image } from "expo-image";
@@ -8,6 +7,7 @@ import { useAtom } from "jotai";
 import { authAtom } from "@/atoms/auth";
 import { useEffect, useRef, useState } from "react";
 import * as SecureStore from "expo-secure-store";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function Success() {
   const { email } = useLocalSearchParams();
@@ -15,7 +15,7 @@ export default function Success() {
   const emailwithoutatpart = emailString?.split("@")[0];
   const [isLoggedIn, setIsLoggedIn] = useAtom(authAtom);
   const [errorText, setErrorText] = useState("");
-  // Track mounted status
+  const router = useRouter();
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
@@ -25,11 +25,9 @@ export default function Success() {
   }, []);
 
   async function handleSubmit() {
-    // Get a session token & set isLoggedIn to true
-    // get the refresh token from secure store
     SecureStore.getItemAsync("refreshToken").then(async (token) => {
       try {
-        console.log("Token:", token);
+        console.log("Refresh token:", token);
         const response = await fetch(
           `https://aviator.spectralo.hackclub.app/api/sessions/login`,
           {
@@ -42,7 +40,13 @@ export default function Success() {
         );
         const data = await response.json();
         if (data.token) {
+          await SecureStore.setItemAsync("sessionToken", data.token);
+          console.log("Session token stored successfully");
+          console.log("Login successful:", data);
           setIsLoggedIn(true);
+          setTimeout(() => {
+            router.replace("/(app)");
+          }, 500);
         } else {
           console.log("Login failed:", data);
           setErrorText(
@@ -103,11 +107,7 @@ export default function Success() {
             Get Started with Aviator
           </ButtonText>
         </Button>
-        <Text
-          size="xl"
-          bold
-          className="text-red-600 mt-2 bg-background-0 rounded-lg"
-        >
+        <Text size="xl" bold className="text-red-600 mt-2 rounded-lg">
           {errorText}
         </Text>
       </View>

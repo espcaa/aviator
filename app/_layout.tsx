@@ -20,7 +20,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     setIsLoading(true);
-    // Check if the user is logged in
     SecureStore.getItemAsync("refreshToken").then((token) => {
       if (token) {
         // Check if the token is valid by trying to get a session token

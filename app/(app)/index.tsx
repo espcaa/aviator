@@ -1,28 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, StyleSheet, Keyboard } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import Mapbox from "@rnmapbox/maps";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 // Import tailwind config
 import { cssInterop } from "nativewind";
 import { Text } from "@/components/ui/text";
 import { useAtom } from "jotai";
-import { mapStyleAtom } from "@/atoms/settings";
+import { colorscheme, mapStyleAtom } from "@/atoms/settings";
 import { Button, ButtonText } from "@/components/ui/button";
+import { useWindowDimensions } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-} from "@/components/ui/modal";
-import { Heading } from "@/components/ui/heading";
-import { CloseIcon, Icon } from "@/components/ui/icon";
-
+import Handle from "@/components/handle";
+import Logo from "@/assets/images/icon.svg";
+import LogoLight from "@/assets/images/icon-light.svg";
 // wow i'm a secret
 
 cssInterop(BottomSheet, {
@@ -47,6 +43,36 @@ function isJwtExpired(token: string): boolean {
 }
 
 export default function HomeScreen() {
+  const { height } = useWindowDimensions();
+  const buttonHeight = height * 0.14;
+
+  const styles = StyleSheet.create({
+    page: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    map: {
+      flex: 1,
+    },
+    button: {
+      justifyContent: "center",
+      alignContent: "center",
+      height: buttonHeight,
+      marginVertical: 8,
+      borderRadius: 250,
+      alignItems: "center",
+    },
+    buttonbig: {
+      justifyContent: "flex-start",
+      height: buttonHeight,
+      flex: 1,
+      marginVertical: 8,
+      borderRadius: 25,
+      alignItems: "center",
+    },
+  });
+
   const [mapStyleUrl, setMapStyleUrl] = useAtom(mapStyleAtom);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [tokenStatus, setTokenStatus] = useState<
@@ -54,7 +80,8 @@ export default function HomeScreen() {
   >("loading");
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [showModal, setShowModal] = React.useState(false);
-
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [colorScheme, setColorScheme] = useAtom(colorscheme);
   const insets = useSafeAreaInsets();
 
   async function fetchMapboxToken(retryCount = 0): Promise<string | null> {
@@ -205,6 +232,7 @@ export default function HomeScreen() {
           variant="outline"
           style={{
             borderRadius: 50,
+
             borderWidth: 0,
             width: 60,
             height: 60,
@@ -231,88 +259,76 @@ export default function HomeScreen() {
         projection="globe"
         scaleBarEnabled={false}
       />
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-        }}
-        size="md"
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={1}
+        snapPoints={["15%", "45%"]}
+        enableDynamicSizing={false}
+        enablePanDownToClose={false}
+        handleComponent={Handle}
+        //@ts-ignore
+        className="bg-background-0"
       >
-        <ModalBackdrop />
-        <ModalContent style={{ width: "90%", borderRadius: 25 }}>
-          <ModalHeader>
-            <Heading size="xl" className="text-typography-950">
-              Aviator v0.1.0
-            </Heading>
-            <ModalCloseButton>
-              <Icon
-                as={CloseIcon}
-                size="md"
-                className="stroke-background-400 group-[:hover]/modal-close-button:stroke-background-700 group-[:active]/modal-close-button:stroke-background-900 group-[:focus-visible]/modal-close-button:stroke-background-900"
-              />
-            </ModalCloseButton>
-          </ModalHeader>
-          <ModalBody>
-            <Text style={{ marginBottom: 20 }}>
-              Note: This is a beta build of Aviator. Some features may not work
-              as expected and you might lose data.
-            </Text>
-            <Button>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <BottomSheetView style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginHorizontal: 16, marginTop: 16 }}>
+            <View className="flex flex-row items-center">
+              {colorScheme === "dark" ? (
+                <Logo className="mr-8" color="#4CAF50" height={28} width={28} />
+              ) : (
+                <LogoLight className="mr-8" height={28} width={28} />
+              )}
+              <Text size="3xl" className="ml-3 font-bold">
+                Aviator
+              </Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                marginTop: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Button
+                style={{ ...styles.button, alignItems: "center" }}
+                className="m-2"
+              >
                 <MaterialIcons
-                  name="confirmation-number"
-                  size={20}
+                  name="account-circle"
+                  size={buttonHeight * 0.3}
                   className="text-background-0 mr-3"
-                />
-                <ButtonText>Passport</ButtonText>
-              </View>
-            </Button>
-
-            <Button className="mt-2">
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                ></MaterialIcons>
+              </Button>
+              <Button style={styles.button} className="m-2">
                 <MaterialIcons
                   name="settings"
-                  size={20}
+                  size={buttonHeight * 0.3}
                   className="text-background-0 mr-3"
-                />
-                <ButtonText>Settings</ButtonText>
-              </View>
-            </Button>
-            <Button
-              className="mt-2"
-              variant="solid"
-              onPress={() => {
-                setShowModal(false);
-                setIsLoggedIn(false);
-                SecureStore.deleteItemAsync("sessionToken");
-                SecureStore.deleteItemAsync("mapboxToken");
-                SecureStore.deleteItemAsync("refreshToken");
-              }}
-              action="negative"
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                ></MaterialIcons>
+              </Button>
+              <Button style={styles.buttonbig} className="m-2">
                 <MaterialIcons
-                  name="logout"
-                  size={20}
+                  name="confirmation-number"
+                  size={buttonHeight * 0.3}
                   className="text-background-0 mr-3"
-                />
-                <ButtonText>Log Out</ButtonText>
-              </View>
-            </Button>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+                ></MaterialIcons>
+                <ButtonText>Passport</ButtonText>
+              </Button>
+            </View>
+            <View style={{ flex: 1, justifyContent: "space-evenly" }}>
+              <Button style={styles.buttonbig} className="m-2">
+                <MaterialIcons
+                  name="airplane-ticket"
+                  size={buttonHeight * 0.3}
+                  className="text-background-0 mr-3"
+                ></MaterialIcons>
+                <ButtonText>Log a flight</ButtonText>
+              </Button>
+            </View>
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  map: {
-    flex: 1,
-  },
-});
